@@ -21,13 +21,11 @@ public class StrikerInputDevice : MonoBehaviour
 
 	private StrikerClient strikerClient;
 	private DeviceBase strikerDevice;
-	private OculusTouchController leftController;
 
 	private void Awake()
 	{
 		inputDevice = InputSystem.AddDevice<MavrikDevice>();
 
-		InputSystem.onDeviceChange += OnDeviceChange;
 		InputSystem.onBeforeUpdate += OnBeforeInputUpdate;
 	}
 
@@ -35,13 +33,7 @@ public class StrikerInputDevice : MonoBehaviour
 	{
 		InputSystem.RemoveDevice(inputDevice);
 
-		InputSystem.onDeviceChange -= OnDeviceChange;
 		InputSystem.onBeforeUpdate -= OnBeforeInputUpdate;
-	}
-
-	private void OnDeviceChange(InputDevice device, InputDeviceChange change)
-	{
-		leftController = (OculusTouchController)XRController.leftHand;
 	}
 
 	public void OnBeforeInputUpdate()

@@ -4,6 +4,7 @@ using UnityEngine.Experimental.Rendering;
 using UnityEngine.Rendering;
 using UnityEngine.XR.ARSubsystems;
 using UnityEngine.XR.Management;
+using UnityEngine.XR.OpenXR.Features.Meta;
 
 namespace Anaglyph.XRTemplate.DepthKit
 {
@@ -39,7 +40,7 @@ namespace Anaglyph.XRTemplate.DepthKit
 
 		public static bool DepthAvailable { get; private set; }
 
-		private XROcclusionSubsystem depthSubsystem;
+		private MetaOpenXROcclusionSubsystem depthSubsystem;
 		private XRFov[]         depthFrameFOVs   = new XRFov[2];
 		private Pose[]          depthFramePoses  = new Pose[2];
 		private XRNearFarPlanes depthPlanes;
@@ -52,6 +53,10 @@ namespace Anaglyph.XRTemplate.DepthKit
 		private void Awake()
 		{
 			Instance = this;
+		}
+
+		private void Start()
+		{
 			normKernel = new(depthNormalCompute, "DepthNorm");
 		}
 
@@ -65,7 +70,7 @@ namespace Anaglyph.XRTemplate.DepthKit
 			XRLoader xrLoader = XRGeneralSettings.Instance.Manager.activeLoader;
 			if (xrLoader == null)
 				return;
-			depthSubsystem = xrLoader.GetLoadedSubsystem<XROcclusionSubsystem>();
+			depthSubsystem = xrLoader.GetLoadedSubsystem<XROcclusionSubsystem>() as MetaOpenXROcclusionSubsystem;
 		}
 
 		public void UpdateCurrentRenderingState()
@@ -117,8 +122,9 @@ namespace Anaglyph.XRTemplate.DepthKit
 			Shader.SetGlobalTexture(agDepthNormTex_ID, normTex);
 
 
-			
-			depthSubsystem.TryGetFrame(Allocator.Temp, out var frame);
+
+			if (!depthSubsystem.TryGetFrame(Allocator.Temp, out var frame))
+				return;
 			frame.TryGetFovs(out var nativeFOVs);
 			nativeFOVs.CopyTo(depthFrameFOVs);
 			frame.TryGetPoses(out var nativePoses);
